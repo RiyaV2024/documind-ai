@@ -135,7 +135,7 @@ public class DocumentController {
                         Rules:
                         - Write 2-3 simple sentences in Hinglish (Hindi written in English letters).
                         - Explain in your own words, do not copy the context.
-                        - Use the reply "Mujhe PDF mein ye nahi mila." ONLY when the CONTEXT has nothing about the question. If you answered, never add it.
+                        - Use the reply "I could not find the answer to this in the uploaded documents." ONLY when the CONTEXT has nothing about the question. If you answered, never add it.
 
                         CONTEXT:
                         {context}
