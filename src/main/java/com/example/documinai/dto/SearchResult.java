@@ -1,4 +1,4 @@
-package com.example.ai_pdf_qa.dto;
+package com.example.documinai.dto;
 
 public record SearchResult(
         String text,

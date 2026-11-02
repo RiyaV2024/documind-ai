@@ -1,6 +1,6 @@
-package com.example.ai_pdf_qa.service;
+package com.example.documinai.service;
 
-import com.example.ai_pdf_qa.dto.DocumentInfo;
+import com.example.documinai.dto.DocumentInfo;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;

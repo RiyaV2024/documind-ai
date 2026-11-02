@@ -1,4 +1,4 @@
-package com.example.ai_pdf_qa.service;
+package com.example.documinai.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,7 @@ public class PdfExtractionService {
             Resource resource = new ByteArrayResource(file.getBytes()) {
                 @Override
                 public String getFilename() {
+
                     return fileName;
                 }
             };

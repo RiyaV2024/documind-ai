@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DocuMind AI</title>
+</head>
+
+<body>
+<h1>AI PDF Question Answering</h1>
+<p>Frontend is running.</p>
+
+<h2>Upload pdf</h2>
+<input type ="file"  id="fileInput" accept =".pdf">
+<button onclick="uploadPdf()">UPLOAD</button>
+<p id ="uploadStatus"></p>
+
+<h2>Stored PDFs</h2>
+<ul id="docList"></ul>
+
+<script>
+    async function uploadPdf(){
+    const fileInput = document.getElementById("fileInput");
+    const status = document.getElementById("uploadStatus");
+    if(fileInput.files.length===0){
+    status.textContent ="Choice One Pdf";
+    return;
+    }
+    const formData = new FormData();
+    formData.append("file",fileInput.files[0]);
+    status.textContent = "Uploading... Please Wait...";
+    try{
+      const response = await fetch("/api/documents/upload",{
+      method:"POST",
+      body: formData
+      });
+      if(response.ok){
+      status.textContent = "Done" +data.fileName +","+ data.totalPages + " pages";
+      loadDocuments();
+      }
+      else{
+           status.textContent = "Error: " + data.message;
+}
+}
+catch (e) {
+        status.textContent = "No response received from the server.";
+    }
+}
+
+    async function loadDocuments() {
+    const response = await fetch("/api/documents");
+      const docs = await response.json();
+      const list = document.getElementById("docList");
+      list.innerHTML = "";
+      for (const d of docs) {
+         const li = document.createElement("li");
+      li.textContent = d.fileName + " (" + d.chunks + " chunks)";            list.appendChild(li);
+        }
+    }
+    loadDocuments();
+
+
+</script>
+</body>
+</html>

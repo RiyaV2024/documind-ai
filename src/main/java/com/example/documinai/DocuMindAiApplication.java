@@ -1,13 +1,11 @@
-package com.example.ai_pdf_qa;
+package com.example.documinai;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AiPdfQaApplication {
-
+public class DocuMindAiApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(AiPdfQaApplication.class, args);
+		SpringApplication.run(DocuMindAiApplication.class, args);
 	}
-
 }

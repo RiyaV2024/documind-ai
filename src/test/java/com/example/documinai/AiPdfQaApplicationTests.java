@@ -1,4 +1,4 @@
-package com.example.ai_pdf_qa;
+package com.example.documinai;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

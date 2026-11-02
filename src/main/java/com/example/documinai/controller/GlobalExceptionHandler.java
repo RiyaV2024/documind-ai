@@ -1,7 +1,6 @@
-package com.example.ai_pdf_qa.controller;
-
+package com.example.documinai.controller;
 import org.springframework.http.ResponseEntity;
-import com.example.ai_pdf_qa.dto.ErrorResponse;
+import com.example.documinai.dto.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
