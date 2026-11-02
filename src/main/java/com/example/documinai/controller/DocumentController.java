@@ -1,3 +1,4 @@
+
 package com.example.documinai.controller;
 import com.example.documinai.dto.AnswerResponse;
 import com.example.documinai.dto.DocumentInfo;
@@ -29,6 +30,7 @@ public class DocumentController {
     private final ChatClient chatClient;
     private final DocumentService documentService;
 
+    // Constructor injection for required dependencies.
     public DocumentController(PdfExtractionService pdfExtractionService,
                               VectorStore vectorStore,
                               ChatClient.Builder chatClientBuilder,
@@ -39,13 +41,17 @@ public class DocumentController {
         this.documentService = documentService;
     }
 
+    // Uploads PDF, extracts text, creates chunks and stores them in VectorStore.
     @PostMapping("/upload")
     public UploadResponse upload(@RequestParam("file") MultipartFile file) {
         List<Document> pages = pdfExtractionService.extract(file);
+
         TokenTextSplitter splitter = new TokenTextSplitter();
         List<Document> chunks = splitter.apply(pages);
 
         String fileName = file.getOriginalFilename();
+
+        // Remove old chunks before storing the updated PDF content.
         Filter.Expression sameFile = new FilterExpressionBuilder()
                 .eq("file_name", fileName)
                 .build();
@@ -57,8 +63,10 @@ public class DocumentController {
         for (Document page : pages) {
             sb.append(page.getText()).append("\n");
         }
+
         String fullText = sb.toString().replaceAll("\\s+", " ");
         String preview = fullText.strip();
+
         if (preview.length() > 300) {
             preview = preview.substring(0, 300);
         }
@@ -71,6 +79,7 @@ public class DocumentController {
         );
     }
 
+    // Retrieves the most relevant PDF chunks using semantic search.
     @GetMapping("/search")
     public List<SearchResult> search(@RequestParam("question") String question) {
         List<Document> found = vectorStore.similaritySearch(
@@ -79,6 +88,7 @@ public class DocumentController {
                         .topK(4)
                         .build()
         );
+
         List<SearchResult> results = new ArrayList<>();
         for (Document d : found) {
             results.add(new SearchResult(
@@ -87,9 +97,11 @@ public class DocumentController {
                     d.getMetadata().get("file_name")
             ));
         }
+
         return results;
     }
 
+    // Implements RAG: retrieves relevant context and generates an AI answer.
     @GetMapping("/ask")
     public AnswerResponse ask(@RequestParam("question") String question) {
         List<Document> found = vectorStore.similaritySearch(
@@ -106,6 +118,7 @@ public class DocumentController {
 
         StringBuilder context = new StringBuilder();
         List<SearchResult> sources = new ArrayList<>();
+
         for (Document d : found) {
             context.append(d.getText()).append("\n\n");
             sources.add(new SearchResult(
@@ -115,6 +128,7 @@ public class DocumentController {
             ));
         }
 
+        // Generates an answer using only the retrieved PDF context.
         String answer = chatClient.prompt()
                 .user(u -> u.text("""
                         You are a helpful assistant. Answer the QUESTION using only the CONTEXT below.
@@ -139,17 +153,20 @@ public class DocumentController {
         return new AnswerResponse(answer, sources);
     }
 
+    // Returns all uploaded PDF documents.
     @GetMapping
     public List<DocumentInfo> list() {
         return documentService.list();
     }
 
+    // Deletes a PDF and its associated vector data.
     @DeleteMapping("/{fileName}")
     public String delete(@PathVariable String fileName) {
         if (!documentService.exists(fileName)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Ye PDF nahi mili: " + fileName);
         }
+
         documentService.deleteByFileName(fileName);
         return "Deleted: " + fileName;
     }
