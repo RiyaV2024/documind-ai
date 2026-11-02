@@ -1,4 +1,4 @@
-# AI PDF Question Answering System
+# DocuMind AI
 
 A Retrieval-Augmented Generation (RAG) backend built with **Java, Spring Boot and Spring AI**.
 Upload a text-based PDF, ask questions about it, and get an answer generated from the retrieved parts of that PDF, along with the page numbers it came from.
@@ -55,8 +55,8 @@ Question -> embedding -> similarity search in pgvector (top 4, threshold 0.65)
 ## Project structure
 
 ```
-src/main/java/com/example/ai_pdf_qa
-├── AiPdfQaApplication.java
+src/main/java/com/example/documinai
+├── DocuMindAiApplication.java
 ├── controller
 │   ├── DocumentController.java        REST endpoints
 │   └── GlobalExceptionHandler.java    turns errors into clear JSON
@@ -83,8 +83,8 @@ src/main/java/com/example/ai_pdf_qa
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/RiyaV2024/ai-pdf-qa.git
-cd ai-pdf-qa
+git clone https://github.com/RiyaV2024/documind-ai.git
+cd documind-ai
 ```
 
 **2. Pull the two Ollama models**
@@ -192,12 +192,26 @@ List:
 ]
 ```
 
+### When the answer is not in the PDF
+
+If no stored chunk is similar enough to the question (similarity below the 0.65 threshold), the chat model is **not called**. The API returns a normal response with a "not found" message and an empty `sources` list. This keeps the model from making things up.
+
+```json
+{
+  "answer": "I could not find the answer to this in the uploaded documents.",
+  "sources": []
+}
+```
+
+If you get this, try rephrasing the question, asking in the same language as the PDF, or checking that the right document is uploaded.
+
 ### Errors
 
 All errors use the same shape:
 
 ```json
-{ "status": 400, "message": "Only PDF files are allowed." }```
+{ "status": 400, "message": "Only PDF files are allowed." }
+```
 
 | Situation | Status |
 |---|---|
@@ -235,7 +249,7 @@ The embedding dimension must match the embedding model. If you switch to a diffe
 
 ## Postman collection
 
-A ready-made collection with all endpoints is in `postman/AI_PDF_QA.postman_collection.json`. Import it into Postman and choose any text-based PDF for the upload request.
+A ready-made collection with all endpoints is in `postman/DocuMind_AI.postman_collection.json`. Import it into Postman and choose any text-based PDF for the upload request.
 
 ## Author
 

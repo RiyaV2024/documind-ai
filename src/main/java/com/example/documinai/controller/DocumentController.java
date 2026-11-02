@@ -113,7 +113,7 @@ public class DocumentController {
         );
 
         if (found.isEmpty()) {
-            return new AnswerResponse("Mujhe PDF mein ye nahi mila.", new ArrayList<>());
+            return new AnswerResponse("I could not find the answer to this in the uploaded documents.", new ArrayList<>());
         }
 
         StringBuilder context = new StringBuilder();
