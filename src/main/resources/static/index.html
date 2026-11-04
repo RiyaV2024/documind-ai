@@ -1,70 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>DocuMind AI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuMind AI</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-<h1>DocuMind AI</h1>
-<p>Frontend is running.</p>
+<div class="container">
+  <header>
+    <h1>📚 DocuMind AI</h1>
+    <p>Upload PDFs and ask questions using AI.</p>
+  </header>
 
-<h2>Upload pdf</h2>
-<input type="file" id="fileInput" accept=".pdf">
-<button onclick="uploadPdf()">UPLOAD</button>
-<p id="uploadStatus"></p>
+  <div class="card">
+    <h2>Upload PDF</h2>
+    <div class="row">
+      <input type="file" id="fileInput" accept=".pdf">
+      <button id="uploadButton" onclick="uploadPdf()">Upload</button>
+    </div>
+    <p id="uploadStatus" class="status"></p>
+  </div>
 
-<h2>Stored PDFs</h2>
-<ul id="docList"></ul>
+  <div class="card">
+    <h2>Stored PDFs</h2>
+    <ul id="docList" class="docs"></ul>
+    <p id="listStatus" class="status"></p>
+  </div>
 
-<script>
-    async function uploadPdf() {
-        const fileInput = document.getElementById("fileInput");
-        const status = document.getElementById("uploadStatus");
+  <div class="card">
+    <h2>Ask Question</h2>
+    <div class="row">
+      <input type="text"  id="questionInput" placeholder="Ask something from your PDFs...">
+      <button id="askButton" onclick="askQuestion()">Ask</button>
+    </div>
+    <p id="askStatus" class="status"></p>
+    <div id="answerArea" style="display:none">
+      <div id="answerText" class="answer-box"></div>
+      <h3>Sources</h3>
+      <div id="sourcesList"></div>
+    </div>
+  </div>
+</div>
 
-        if (fileInput.files.length === 0) {
-            status.textContent = "Choose one PDF first.";
-            return;
-        }
+<script src="js/app.js"></script>
 
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
-
-        status.textContent = "Uploading... Please wait...";
-
-        try {
-            const response = await fetch("/api/documents/upload", {
-                method: "POST",
-                body: formData
-            });
-            const data = await response.json();
-
-            if (response.ok) {
-                status.textContent = "Done: " + data.fileName + ", " + data.totalPages + " pages";
-                loadDocuments();
-            } else {
-                status.textContent = "Error: " + data.message;
-            }
-        } catch (e) {
-            status.textContent = "No response received from the server.";
-        }
-    }
-
-    async function loadDocuments() {
-        const response = await fetch("/api/documents");
-        const docs = await response.json();
-
-        const list = document.getElementById("docList");
-        list.innerHTML = "";
-
-        for (const d of docs) {
-            const li = document.createElement("li");
-            li.textContent = d.fileName + " (" + d.chunks + " chunks)";
-            list.appendChild(li);
-        }
-    }
-
-    loadDocuments();
-</script>
 </body>
 </html>
