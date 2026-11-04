@@ -40,7 +40,9 @@ HTML, CSS, JavaScript → Spring Boot → PDF Processing → Embeddings (Ollama)
 **Question answering flow**
 
 User Question → Semantic Search → Relevant Chunks → Ollama (llama3.2:3b) → Answer with Sources
-!(docs/architecture.png)
+**System Architecture Diagram**
+
+![DocuMind AI Architecture](./docs/architecture.png)
 ## Why RAG
 
 A general language model has never seen your PDF, and when it does not know something it may invent an answer. RAG fixes this by first **retrieving** the relevant chunks of your document, then giving only those chunks to the model as context, so the answer stays grounded in the document.
