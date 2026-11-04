@@ -31,6 +31,16 @@ Everything runs locally and for free: the language models run on **Ollama** and 
 
 ![Wrong file type error](docs/upload-error.png)
 
+## Architecture
+
+**Frontend communicates with Spring Boot REST APIs**
+
+HTML, CSS, JavaScript → Spring Boot → PDF Processing → Embeddings (Ollama) → PostgreSQL + pgvector
+
+**Question answering flow**
+
+User Question → Semantic Search → Relevant Chunks → Ollama (llama3.2:3b) → Answer with Sources
+
 ## Why RAG
 
 A general language model has never seen your PDF, and when it does not know something it may invent an answer. RAG fixes this by first **retrieving** the relevant chunks of your document, then giving only those chunks to the model as context, so the answer stays grounded in the document.
