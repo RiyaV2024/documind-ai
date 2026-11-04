@@ -27,6 +27,10 @@ Everything runs locally and for free: the language models run on **Ollama** and 
 
 ![Answer not found](docs/not-found.png)
 
+**A wrong file type shows a clear error**
+
+![Wrong file type error](docs/upload-error.png)
+
 ## Why RAG
 
 A general language model has never seen your PDF, and when it does not know something it may invent an answer. RAG fixes this by first **retrieving** the relevant chunks of your document, then giving only those chunks to the model as context, so the answer stays grounded in the document.
