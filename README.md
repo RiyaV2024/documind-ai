@@ -1,9 +1,31 @@
 # DocuMind AI
 
-A Retrieval-Augmented Generation (RAG) backend built with **Java, Spring Boot and Spring AI**.
-Upload a text-based PDF, ask questions about it, and get an answer generated from the retrieved parts of that PDF, along with the page numbers it came from.
+A Retrieval-Augmented Generation (RAG) application built with **Java, Spring Boot and Spring AI**, with a simple web interface.
+Upload a text-based PDF, ask questions about it, and get an answer generated from the retrieved parts of that PDF, along with the file and page numbers it came from.
 
 Everything runs locally and for free: the language models run on **Ollama** and the vectors are stored in **PostgreSQL with pgvector**.
+
+## Screenshots
+
+**Upload PDFs and manage them**
+
+![DocuMind AI home page](docs/home.png)
+
+**Ask a question and see the answer with its sources**
+
+![DocuMind AI answer with sources](docs/answer-with-sources.png)
+
+**Upload a PDF and see it in the stored list**
+
+![Upload success](docs/upload-success.png)
+
+**Delete asks for confirmation**
+
+![Delete confirmation](docs/delete-confirm.png)
+
+**When the answer is not in the PDFs**
+
+![Answer not found](docs/not-found.png)
 
 ## Why RAG
 
@@ -21,6 +43,7 @@ A general language model has never seen your PDF, and when it does not know some
 - List all stored PDFs and delete one by file name
 - Clear JSON error responses through a global exception handler
 - Database credentials kept out of the code (`.env` and environment variables)
+- Web interface: upload, list, delete, ask, and expandable sources, with a loading indicator and light and dark themes
 
 ## Tech stack
 
@@ -32,6 +55,7 @@ A general language model has never seen your PDF, and when it does not know some
 | Chat model | `llama3.2:3b` (Ollama) |
 | Embedding model | `nomic-embed-text` (Ollama, 768 dimensions) |
 | Vector database | PostgreSQL 17 + pgvector (Docker) |
+| Frontend | HTML, CSS and JavaScript (fetch), no framework |
 | Build tool | Maven |
 | API testing | Postman |
 
@@ -55,20 +79,27 @@ Question -> embedding -> similarity search in pgvector (top 4, threshold 0.65)
 ## Project structure
 
 ```
-src/main/java/com/example/documinai
-├── DocuMindAiApplication.java
-├── controller
-│   ├── DocumentController.java        REST endpoints
-│   └── GlobalExceptionHandler.java    turns errors into clear JSON
-├── service
-│   ├── PdfExtractionService.java      validates and reads PDFs
-│   └── DocumentService.java           list, exists and delete logic
-└── dto
-    ├── UploadResponse.java
-    ├── SearchResult.java
-    ├── AnswerResponse.java
-    ├── DocumentInfo.java
-    └── ErrorResponse.java
+src/main
+├── java/com/example/documinai
+│   ├── DocuMindAiApplication.java
+│   ├── controller
+│   │   ├── DocumentController.java        REST endpoints
+│   │   └── GlobalExceptionHandler.java    turns errors into clear JSON
+│   ├── service
+│   │   ├── PdfExtractionService.java      validates and reads PDFs
+│   │   └── DocumentService.java           list, exists and delete logic
+│   └── dto
+│       ├── UploadResponse.java
+│       ├── SearchResult.java
+│       ├── AnswerResponse.java
+│       ├── DocumentInfo.java
+│       └── ErrorResponse.java
+└── resources
+    ├── application.properties
+    └── static                             web interface, served by Spring Boot
+        ├── index.html
+        ├── css/style.css
+        └── js/app.js
 ```
 
 ## Prerequisites
@@ -138,7 +169,20 @@ export DB_USER=raguser DB_PASSWORD=ragpass
 
 In IntelliJ IDEA you can instead add `DB_USER=raguser;DB_PASSWORD=ragpass` under **Run, Edit Configurations, Environment variables**.
 
-The API is now available at `http://localhost:8080`. The `vector_store` table is created automatically on the first start.
+**6. Open the app**
+
+Go to `http://localhost:8080` for the web interface. The REST API is under `http://localhost:8080/api/documents`. The `vector_store` table is created automatically on the first start. Make sure Ollama is running, because the app uses it for embeddings and answers.
+
+## Web interface
+
+The interface is a static page in `src/main/resources/static`, served by Spring Boot itself, so it runs on the same address as the API and needs no CORS setup.
+
+- **Upload PDF:** choose a text-based PDF and upload it. Errors from the API (for example a wrong file type) are shown on the page.
+- **Stored PDFs:** every uploaded file with its chunk count, and a Delete button (asks for confirmation).
+- **Ask Question:** type a question and press Ask or Enter. A loading indicator is shown because a local model can take up to a minute.
+- **Answer and Sources:** the answer, plus one expandable box per source with the file name, page number and the retrieved text.
+
+Text coming from PDFs is always inserted with `textContent`, never as HTML, so a PDF cannot inject markup into the page.
 
 ## API
 
@@ -216,7 +260,6 @@ All errors use the same shape:
 | Situation | Status |
 |---|---|
 | File is empty or not a `.pdf` | 400 |
-| PDF has no extractable text | 422 |
 | Delete a file that is not stored | 404 |
 | Anything unexpected (for example Ollama is not running) | 500 with a generic message |
 
@@ -233,9 +276,10 @@ The embedding dimension must match the embedding model. If you switch to a diffe
 
 ## Known limitations
 
-- **Scanned PDFs are not supported.** A PDF made of page images has no text layer, so nothing useful is extracted. OCR is not implemented yet.
+- **Scanned PDFs are not supported.** A PDF made of page images has no text layer, so nothing useful is extracted. OCR is not implemented yet, and such a file is not rejected with a clear error.
 - **Small local models.** `llama3.2:3b` can phrase answers awkwardly or make mistakes. The `sources` field is included so answers can be checked against the document.
 - **Language mismatch lowers recall.** A question in one language against a PDF in another (for example a Hinglish question on an English PDF) can score below the threshold and return "not found". Best results come when the question and the PDF use the same language.
+- **Prompt injection.** The text of the uploaded PDFs is placed into the model prompt, so a PDF written to give instructions to the model could influence its answer. Only upload PDFs you trust.
 - Search runs across all uploaded PDFs, so chunks from other files can appear in the sources.
 - Files are identified by file name, so two different PDFs with the same name replace each other.
 - No authentication. This is a local development setup.
@@ -243,9 +287,10 @@ The embedding dimension must match the embedding model. If you switch to a diffe
 ## Roadmap
 
 - Search within a single selected PDF
-- OCR for scanned PDFs
-- Web frontend
+- Reject scanned PDFs with a clear error, and add OCR support
+- Unit tests for the services
 - Cloud LLM and embedding model for deployment, and hosting the app and database
+- A React version of the interface
 
 ## Postman collection
 
